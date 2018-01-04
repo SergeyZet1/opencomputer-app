@@ -1,14 +1,14 @@
---------Библиотеки---------
+-------------Библиотеки------------
 local component = require("component")
 local gpu = component.gpu
 local term = require("term") 
 local event = require("event")
----------------------------------
+------------------------------------
 local ContextON = false
 local blue = true
 local red, black = false
 local xSize, ySize = gpu.getResolution()
-local function menu() -- Создаём меню
+local function menu()
   for x = 1, xSize do 
     gpu.setForeground(0x403e3e) 
     gpu.fill(x,1,1,1,"█") 
@@ -47,10 +47,10 @@ local function contextHide()
   end 
   ContextON = false
 end
-gpu.setBackground(0xFFFFFF) --ставим белый фон
-term.clear() --очищаем экран
+gpu.setBackground(0xFFFFFF)
+term.clear()
 menu()
-while true do -- запускаем бесконечный цикл
+while true do
 local e = { event.pull() }
 --[[
 e[1] - event
@@ -61,23 +61,23 @@ e[5] - нажатая кнопка
 e[6] - имя игрока
 ]]
 if(e[1] == "touch" and ContextON == true and e[3] <= 20 and e[4] == 2 and e[5] == 0) then --Если выбран первый пункт в контекстном меню
-contextHide() -- выключаем контекстное меню
-gpu.setBackground(0xFFFFFF) --ставим белый фон
-term.clear() --очищаем экран
-menu() -- вызываем меню
-elseif(e[1] == "touch" and ContextON == true and e[3] <= 20 and e[4] == 3 and e[5] == 0) then
+contextHide() 
+gpu.setBackground(0xFFFFFF)
+term.clear()
+menu() 
+elseif(e[1] == "touch" and ContextON == true and e[3] <= 20 and e[4] == 3 and e[5] == 0) then --Если выбран второй пункт в контекстном меню
 break
-elseif(e[1] == "touch" and ContextON == true and e[3] <= 20 and e[4] == 5 and e[5] == 0) then
+elseif(e[1] == "touch" and ContextON == true and e[3] <= 20 and e[4] == 5 and e[5] == 0) then --Если выбран третий пункт в контекстном меню
 red = true
 black = false
 blue = false
 contextHide()
-elseif(e[1] == "touch" and ContextON == true and e[3] <= 20 and e[4] == 6 and e[5] == 0) then
+elseif(e[1] == "touch" and ContextON == true and e[3] <= 20 and e[4] == 6 and e[5] == 0) then --Если выбран четвёртый пункт в контекстном меню
 blue = true
 red = false
 black = false
 contextHide()
-elseif(e[1] == "touch" and ContextON == true and e[3] <= 20 and e[4] == 7 and e[5] == 0) then
+elseif(e[1] == "touch" and ContextON == true and e[3] <= 20 and e[4] == 7 and e[5] == 0) then --Если выбран пятый пункт в контекстном меню
 black = true
 red = false
 blue = false
@@ -87,55 +87,55 @@ if(red == true) then
 if(ContextON == true and e[3] <= 20 and e[4] > 8) then
 gpu.setForeground(0xff0000) -- делаем красным gpu.fill
 gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█") -- прорисовываем символ 
+gpu.fill(e[3],e[4],1,1,"█")
 elseif(ContextON == true and e[4] <= 8 and e[3] > 20) then
 gpu.setForeground(0xff0000) -- делаем красным gpu.fill
 gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█") -- прорисовываем символ
+gpu.fill(e[3],e[4],1,1,"█")
 elseif(ContextON == true and e[4] > 8 and e[3] > 20) then
 gpu.setForeground(0xff0000) -- делаем красным gpu.fill
 gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█") -- прорисовываем символ
+gpu.fill(e[3],e[4],1,1,"█")
 elseif(ContextON == false) then
 gpu.setForeground(0xff0000) -- делаем красным gpu.fill
 gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█") -- прорисовываем символ
+gpu.fill(e[3],e[4],1,1,"█")
 end
 elseif(blue == true) then
 if(ContextON == true and e[3] <= 20 and e[4] > 8) then
 gpu.setForeground(0x0000ff) -- делаем синим gpu.fill
 gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█") -- прорисовываем символ 
+gpu.fill(e[3],e[4],1,1,"█")
 elseif(ContextON == true and e[4] <= 8 and e[3] > 20) then
 gpu.setForeground(0x0000ff) -- делаем синим gpu.fill
 gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█") -- прорисовываем символ
+gpu.fill(e[3],e[4],1,1,"█")
 elseif(ContextON == true and e[4] > 8 and e[3] > 20) then
 gpu.setForeground(0x0000ff) -- делаем синим gpu.fill
 gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█") -- прорисовываем символ
+gpu.fill(e[3],e[4],1,1,"█")
 elseif(ContextON == false) then
 gpu.setForeground(0x0000FF) -- делаем синим gpu.fill
 gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█") -- прорисовываем символ
+gpu.fill(e[3],e[4],1,1,"█")
 end
 elseif(black == true) then
 if(ContextON == true and e[3] <= 20 and e[4] > 8) then
 gpu.setForeground(0x000000) -- делаем чёрным gpu.fill
 gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█") -- прорисовываем символ 
+gpu.fill(e[3],e[4],1,1,"█")
 elseif(ContextON == true and e[4] <= 8 and e[3] > 20) then
 gpu.setForeground(0x000000) -- делаем чёрным gpu.fill
 gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█") -- прорисовываем символ
+gpu.fill(e[3],e[4],1,1,"█")
 elseif(ContextON == true and e[4] > 8 and e[3] > 20) then
 gpu.setForeground(0x000000) -- делаем чёрным gpu.fill
 gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█") -- прорисовываем символ
+gpu.fill(e[3],e[4],1,1,"█")
 elseif(ContextON == false) then
 gpu.setForeground(0x000000) -- делаем чёрным gpu.fill
 gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█") -- прорисовываем символ
+gpu.fill(e[3],e[4],1,1,"█")
 end
 end
 elseif(act == "touch" and e[5] == 1 and e[4] > 1 or act == "drag" and e[5] == 1 and e[4] > 1) then -- проверяем на то, нажата или зажата правая кнопка
@@ -157,10 +157,10 @@ gpu.setForeground(0xFFFFFF)
 gpu.fill(e[3],e[4],1,1," ")
 end
 elseif(e[1] == "key_down" and e[3] == 1057 or e[3] == 67) then -- если нажата комбинация клавиш shift+c
-contextHide() -- выключаем контекстное меню, если оно было включено
-gpu.setBackground(0xFFFFFF) --ставим белый фон
-term.clear() --очищаем экран
-menu() -- вызываем меню
+contextHide()
+gpu.setBackground(0xFFFFFF)
+term.clear()
+menu()
 elseif(e[1] == "touch" and e[3] <= 4 and e[4] == 1) then
 if(ContextON == false) then
 contextShow()
@@ -168,11 +168,11 @@ else
 contextHide()
 end
 elseif(e[1] == "touch" and e[3] == xSize and e[4] == 1) then --если была нажата кнопка "X"
-break --останавливаем цикл
+break
 end
 end
 gpu.setBackground(0x000000)
-gpu.setForeground(0xFFFFFF) --делаем всё, как обычно 
+gpu.setForeground(0xFFFFFF)
 term.clear()
 print("Спасибо за использование программы CBEdit v1.5 by SergeyZet1!")
 os.sleep(2)
