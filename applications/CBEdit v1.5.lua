@@ -9,10 +9,8 @@ local blue = true
 local red, black = false
 local xSize, ySize = gpu.getResolution()
 local function menu()
-  for x = 1, xSize do 
-    gpu.setForeground(0x403e3e) 
-    gpu.fill(x,1,1,1,"█") 
-  end  
+  gpu.setBackground(0x403e3e) 
+  gpu.fill(1,1,xSize,1," ") 
   gpu.setForeground(0xeb0707)
   gpu.setBackground(0x403e3e)
   gpu.set(xSize, 1, "X")
@@ -21,12 +19,8 @@ local function menu()
   gpu.set((xSize/2)-11, 1, "CBEdit v1.5") 
 end
 local function contextShow()
-  for y = 2, 8 do
-    for x = 1, 20 do
-      gpu.setForeground(0xb5acac)      
-      gpu.fill(x,y,1,1,"█")
-    end
-  end
+  gpu.setBackground(0xb5acac)      
+  gpu.fill(1,2,20,7," ")
   gpu.setForeground(0x000000)
   gpu.setBackground(0xb5acac)
   gpu.set(1,2,"Очистить поле")
@@ -39,12 +33,8 @@ local function contextShow()
   ContextON = true
 end
 local function contextHide()
-  for y = 2, 8 do
-    for x = 1, 20 do
-      gpu.setForeground(0xFFFFFF)      
-      gpu.fill(x,y,1,1,"█")
-    end
-  end 
+  gpu.setBackground(0xFFFFFF)      
+  gpu.fill(1,2,20,7," ")
   ContextON = false
 end
 gpu.setBackground(0xFFFFFF)
@@ -85,76 +75,60 @@ contextHide()
 elseif(e[1] == "drag" and e[5] == 0 and e[4] > 1 or e[1] == "touch" and e[5] == 0 and e[4] > 1) then -- проверяем на то, нажата или зажата ли мышка
 if(red == true) then
 if(ContextON == true and e[3] <= 20 and e[4] > 8) then
-gpu.setForeground(0xff0000) -- делаем красным gpu.fill
-gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█")
+gpu.setBackground(0xff0000) -- делаем красным gpu.fill
+gpu.set(e[3],e[4]," ")
 elseif(ContextON == true and e[4] <= 8 and e[3] > 20) then
-gpu.setForeground(0xff0000) -- делаем красным gpu.fill
-gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█")
+gpu.setBackground(0xff0000) -- делаем красным gpu.fill
+gpu.set(e[3],e[4]," ")
 elseif(ContextON == true and e[4] > 8 and e[3] > 20) then
-gpu.setForeground(0xff0000) -- делаем красным gpu.fill
-gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█")
+gpu.setBackground(0xff0000) -- делаем красным gpu.fill
+gpu.set(e[3],e[4]," ")
 elseif(ContextON == false) then
-gpu.setForeground(0xff0000) -- делаем красным gpu.fill
-gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█")
+gpu.setBackground(0xff0000) -- делаем красным gpu.fill
+gpu.set(e[3],e[4]," ")
 end
 elseif(blue == true) then
 if(ContextON == true and e[3] <= 20 and e[4] > 8) then
-gpu.setForeground(0x0000ff) -- делаем синим gpu.fill
-gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█")
+gpu.setBackground(0x0000FF) -- делаем синим gpu.fill
+gpu.set(e[3],e[4]," ")
 elseif(ContextON == true and e[4] <= 8 and e[3] > 20) then
-gpu.setForeground(0x0000ff) -- делаем синим gpu.fill
-gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█")
+gpu.setBackground(0x0000FF) -- делаем синим gpu.fill
+gpu.set(e[3],e[4]," ")
 elseif(ContextON == true and e[4] > 8 and e[3] > 20) then
-gpu.setForeground(0x0000ff) -- делаем синим gpu.fill
-gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█")
+gpu.setBackground(0x0000FF) -- делаем синим gpu.fill
+gpu.set(e[3],e[4]," ")
 elseif(ContextON == false) then
-gpu.setForeground(0x0000FF) -- делаем синим gpu.fill
-gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█")
+gpu.setBackground(0x0000FF) -- делаем синим gpu.fill
+gpu.set(e[3],e[4]," ")
 end
 elseif(black == true) then
 if(ContextON == true and e[3] <= 20 and e[4] > 8) then
-gpu.setForeground(0x000000) -- делаем чёрным gpu.fill
-gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█")
+gpu.setBackground(0x000000) -- делаем чёрным gpu.fill
+gpu.set(e[3],e[4]," ")
 elseif(ContextON == true and e[4] <= 8 and e[3] > 20) then
-gpu.setForeground(0x000000) -- делаем чёрным gpu.fill
-gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█")
+gpu.setBackground(0x000000) -- делаем чёрным gpu.fill
+gpu.set(e[3],e[4]," ")
 elseif(ContextON == true and e[4] > 8 and e[3] > 20) then
-gpu.setForeground(0x000000) -- делаем чёрным gpu.fill
-gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█")
+gpu.setBackground(0x000000) -- делаем чёрным gpu.fill
+gpu.set(e[3],e[4]," ")
 elseif(ContextON == false) then
-gpu.setForeground(0x000000) -- делаем чёрным gpu.fill
-gpu.setBackground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1,"█")
+gpu.setBackground(0x000000) -- делаем чёрным gpu.fill
+gpu.set(e[3],e[4]," ")
 end
 end
-elseif(act == "touch" and e[5] == 1 and e[4] > 1 or act == "drag" and e[5] == 1 and e[4] > 1) then -- проверяем на то, нажата или зажата правая кнопка
+elseif(e[1] == "touch" and e[5] == 1 and e[4] > 1 or e[1] == "drag" and e[5] == 1 and e[4] > 1) then -- проверяем на то, нажата или зажата правая кнопка
 if(ContextON == true and e[3] <= 20 and e[4] > 8) then
 gpu.setBackground(0xFFFFFF)
-gpu.setForeground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1," ")
+gpu.set(e[3],e[4]," ")
 elseif(ContextON == true and e[4] <= 8 and e[3] > 20) then
 gpu.setBackground(0xFFFFFF)
-gpu.setForeground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1," ")
+gpu.set(e[3],e[4]," ")
 elseif(ContextON == true and e[4] > 8 and e[3] > 20) then
 gpu.setBackground(0xFFFFFF)
-gpu.setForeground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1," ")
+gpu.set(e[3],e[4]," ")
 elseif(ContextON == false) then
 gpu.setBackground(0xFFFFFF)
-gpu.setForeground(0xFFFFFF)
-gpu.fill(e[3],e[4],1,1," ")
+gpu.set(e[3],e[4]," ")
 end
 elseif(e[1] == "key_down" and e[3] == 1057 or e[3] == 67) then -- если нажата комбинация клавиш shift+c
 contextHide()
