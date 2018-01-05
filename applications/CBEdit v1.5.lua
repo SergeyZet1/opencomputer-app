@@ -5,9 +5,15 @@ local term = require("term")
 local event = require("event")
 ------------------------------------
 local ContextON = false
-local blue = true
-local red, black = false
+local CurrentColor = 0x0000FF
 local xSize, ySize = gpu.getResolution()
+local CoordsButton = {
+  {20, 2},
+  {20, 3},
+  {20, 5},
+  {20, 6},
+  {20, 7}
+}
 local function menu()
   gpu.setBackground(0x403e3e) 
   gpu.fill(1,1,xSize,1," ") 
@@ -37,6 +43,36 @@ local function contextHide()
   gpu.fill(1,2,20,7," ")
   ContextON = false
 end
+local function contextAct(num)
+  if(num == 1) then
+    contextHide() 
+    gpu.setBackground(0xFFFFFF)
+    term.clear()
+    menu() 
+  elseif(num == 3) then
+    CurrentColor = 0xff0000
+    contextHide()
+  elseif(num == 4) then
+    CurrentColor = 0x0000FF
+    contextHide()
+  elseif(num == 5) then
+    CurrentColor = 0x000000
+    contextHide()
+  end
+end
+local function contextCheck(x,y)
+  if(x <= CoordsButton[1][1] and y == CoordsButton[1][2]) then return contextAct(1) end
+  if(x <= CoordsButton[2][1] and y == CoordsButton[2][2]) then return 2 end
+  if(x <= CoordsButton[3][1] and y == CoordsButton[3][2]) then return contextAct(3) end
+  if(x <= CoordsButton[4][1] and y == CoordsButton[4][2]) then return contextAct(4) end
+  if(x <= CoordsButton[5][1] and y == CoordsButton[5][2]) then return contextAct(5) end
+end
+local function IsContext(x,y)
+  if(x <= 20 and y >= 8) then return true 
+  elseif(x <= 20 and y >= 8) then return true 
+  elseif(x <= 20 and y <= 8) then return true
+  else return false end
+end
 gpu.setBackground(0xFFFFFF)
 term.clear()
 menu()
@@ -50,80 +86,21 @@ e[4] - Y
 e[5] - нажатая кнопка
 e[6] - имя игрока
 ]]
-if(e[1] == "touch" and ContextON == true and e[3] <= 20 and e[4] == 2 and e[5] == 0) then --Если выбран первый пункт в контекстном меню
-contextHide() 
-gpu.setBackground(0xFFFFFF)
-term.clear()
-menu() 
-elseif(e[1] == "touch" and ContextON == true and e[3] <= 20 and e[4] == 3 and e[5] == 0) then --Если выбран второй пункт в контекстном меню
-break
-elseif(e[1] == "touch" and ContextON == true and e[3] <= 20 and e[4] == 5 and e[5] == 0) then --Если выбран третий пункт в контекстном меню
-red = true
-black = false
-blue = false
-contextHide()
-elseif(e[1] == "touch" and ContextON == true and e[3] <= 20 and e[4] == 6 and e[5] == 0) then --Если выбран четвёртый пункт в контекстном меню
-blue = true
-red = false
-black = false
-contextHide()
-elseif(e[1] == "touch" and ContextON == true and e[3] <= 20 and e[4] == 7 and e[5] == 0) then --Если выбран пятый пункт в контекстном меню
-black = true
-red = false
-blue = false
-contextHide()
+if(e[1] == "touch" and ContextON == true and e[5] == 0) then --Если выбран первый пункт в контекстном меню
+  if(contextCheck(e[3],e[4]) == 2) then
+    break
+  end
+
 elseif(e[1] == "drag" and e[5] == 0 and e[4] > 1 or e[1] == "touch" and e[5] == 0 and e[4] > 1) then -- проверяем на то, нажата или зажата ли мышка
-if(red == true) then
-if(ContextON == true and e[3] <= 20 and e[4] > 8) then
-gpu.setBackground(0xff0000) -- делаем красным gpu.fill
-gpu.set(e[3],e[4]," ")
-elseif(ContextON == true and e[4] <= 8 and e[3] > 20) then
-gpu.setBackground(0xff0000) -- делаем красным gpu.fill
-gpu.set(e[3],e[4]," ")
-elseif(ContextON == true and e[4] > 8 and e[3] > 20) then
-gpu.setBackground(0xff0000) -- делаем красным gpu.fill
+if(ContextON == true and not IsContext(e[3],e[4])) then
+gpu.setBackground(CurrentColor) -- делаем цвет, который задан в CurrentColor
 gpu.set(e[3],e[4]," ")
 elseif(ContextON == false) then
-gpu.setBackground(0xff0000) -- делаем красным gpu.fill
+gpu.setBackground(CurrentColor) -- делаем цвет, который задан в CurrentColor
 gpu.set(e[3],e[4]," ")
-end
-elseif(blue == true) then
-if(ContextON == true and e[3] <= 20 and e[4] > 8) then
-gpu.setBackground(0x0000FF) -- делаем синим gpu.fill
-gpu.set(e[3],e[4]," ")
-elseif(ContextON == true and e[4] <= 8 and e[3] > 20) then
-gpu.setBackground(0x0000FF) -- делаем синим gpu.fill
-gpu.set(e[3],e[4]," ")
-elseif(ContextON == true and e[4] > 8 and e[3] > 20) then
-gpu.setBackground(0x0000FF) -- делаем синим gpu.fill
-gpu.set(e[3],e[4]," ")
-elseif(ContextON == false) then
-gpu.setBackground(0x0000FF) -- делаем синим gpu.fill
-gpu.set(e[3],e[4]," ")
-end
-elseif(black == true) then
-if(ContextON == true and e[3] <= 20 and e[4] > 8) then
-gpu.setBackground(0x000000) -- делаем чёрным gpu.fill
-gpu.set(e[3],e[4]," ")
-elseif(ContextON == true and e[4] <= 8 and e[3] > 20) then
-gpu.setBackground(0x000000) -- делаем чёрным gpu.fill
-gpu.set(e[3],e[4]," ")
-elseif(ContextON == true and e[4] > 8 and e[3] > 20) then
-gpu.setBackground(0x000000) -- делаем чёрным gpu.fill
-gpu.set(e[3],e[4]," ")
-elseif(ContextON == false) then
-gpu.setBackground(0x000000) -- делаем чёрным gpu.fill
-gpu.set(e[3],e[4]," ")
-end
 end
 elseif(e[1] == "touch" and e[5] == 1 and e[4] > 1 or e[1] == "drag" and e[5] == 1 and e[4] > 1) then -- проверяем на то, нажата или зажата правая кнопка
-if(ContextON == true and e[3] <= 20 and e[4] > 8) then
-gpu.setBackground(0xFFFFFF)
-gpu.set(e[3],e[4]," ")
-elseif(ContextON == true and e[4] <= 8 and e[3] > 20) then
-gpu.setBackground(0xFFFFFF)
-gpu.set(e[3],e[4]," ")
-elseif(ContextON == true and e[4] > 8 and e[3] > 20) then
+if(ContextON == true and not IsContext(e[3],e[4])) then
 gpu.setBackground(0xFFFFFF)
 gpu.set(e[3],e[4]," ")
 elseif(ContextON == false) then
