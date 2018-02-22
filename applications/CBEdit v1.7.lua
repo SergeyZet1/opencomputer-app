@@ -71,7 +71,7 @@ local function contextCheck(x,y)
   end
 end
 local function IsContext(x,y)
-  if(x <= 20 and y <= 8 and y ~= 1) then return true 
+  if(x <= 20 and y <= Buttons_MaxY+1 and y ~= 1) then return true 
   else return false end
 end
 --------------------------------------------------------------------------------------------------------
