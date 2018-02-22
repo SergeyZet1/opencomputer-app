@@ -8,12 +8,14 @@ local ContextON = false
 local CurrentColor = 0x0000FF
 local xSize, ySize = gpu.getResolution()
 local CoordsButton = {
-  {20, 2},
-  {20, 3},
-  {20, 5},
-  {20, 6},
-  {20, 7}
+  {20, 2, "Очистить поле"},
+  {20, 3, "Выйти из программы"},
+  {20, 5, "Красный цвет"},
+  {20, 6, "Синий цвет"},
+  {20, 7, "Чёрный цвет"},
+  {20, 8, "Жёлтый цвет"}
 }
+local Buttons_MaxY = CoordsButton[#CoordsButton][2]
 --------------------------Функции, связанные с контекстом-------------------------------------------
 local function menu()
   gpu.setBackground(0x403e3e) 
@@ -23,25 +25,23 @@ local function menu()
   gpu.set(xSize, 1, "X")
   gpu.setForeground(0xFFFFFF)
   gpu.set(1, 1, "Меню")
-  gpu.set((xSize/2)-11, 1, "CBEdit v1.6") 
+  gpu.set((xSize/2)-11, 1, "CBEdit v1.7") 
 end
 local function contextShow()
   gpu.setBackground(0xb5acac)      
-  gpu.fill(1,2,20,7," ")
+  gpu.fill(1,2,20,Buttons_MaxY," ")
   gpu.setForeground(0x000000)
   gpu.setBackground(0xb5acac)
-  gpu.set(1,2,"Очистить поле")
-  gpu.set(1,3,"Выйти из программы")
+  for i = 1, #CoordsButton do
+    gpu.set(1,CoordsButton[i][2],CoordsButton[i][3])
+  end
   gpu.set(1,4,"------------------")
-  gpu.set(1,5,"Красный цвет")
-  gpu.set(1,6,"Синий цвет")
-  gpu.set(1,7,"Чёрный цвет")
-  gpu.set(1,8,"------------------")
+  gpu.set(1,Buttons_MaxY+1,"------------------")
   ContextON = true
 end
 local function contextHide()
   gpu.setBackground(0xFFFFFF)      
-  gpu.fill(1,2,20,7," ")
+  gpu.fill(1,2,20,Buttons_MaxY," ")
   ContextON = false
 end
 local function contextAct(num)
@@ -59,19 +59,19 @@ local function contextAct(num)
   elseif(num == 5) then
     CurrentColor = 0x000000
     contextHide()
+  elseif(num == 6) then
+    CurrentColor = 0xffff00
+    contextHide()
   end
 end
 local function contextCheck(x,y)
-  if(x <= CoordsButton[1][1] and y == CoordsButton[1][2]) then return contextAct(1) end
-  if(x <= CoordsButton[2][1] and y == CoordsButton[2][2]) then return 2 end
-  if(x <= CoordsButton[3][1] and y == CoordsButton[3][2]) then return contextAct(3) end
-  if(x <= CoordsButton[4][1] and y == CoordsButton[4][2]) then return contextAct(4) end
-  if(x <= CoordsButton[5][1] and y == CoordsButton[5][2]) then return contextAct(5) end
+  for i = 1, #CoordsButton do
+    if(x <= CoordsButton[2][1] and y == CoordsButton[2][2]) then return 2
+    elseif(x <= CoordsButton[i][1] and y == CoordsButton[i][2]) then return contextAct(i) end
+  end
 end
 local function IsContext(x,y)
-  if(x <= 20 and y >= 8) then return true 
-  elseif(x <= 20 and y >= 8) then return true 
-  elseif(x <= 20 and y <= 8) then return true
+  if(x <= 20 and y <= 8 and y ~= 1) then return true 
   else return false end
 end
 --------------------------------------------------------------------------------------------------------
@@ -93,11 +93,9 @@ while true do
   e[5] - нажатая кнопка
   e[6] - имя игрока
   ]]
-  if(e[1] == "touch" and ContextON == true and e[5] == 0) then --Если выбран первый пункт в контекстном меню
-    if(contextCheck(e[3],e[4]) == 2) then
-      break
-    end
-
+  if(e[1] == "touch" and ContextON == true and e[5] == 0 and e[4] ~= 1) then --Если выбран первый пункт в контекстном меню
+    local result = contextCheck(e[3],e[4])
+    if(result) == 2 then break end
   elseif(e[1] == "drag" and e[5] == 0 and e[4] > 1 or e[1] == "touch" and e[5] == 0 and e[4] > 1) then -- проверяем на то, нажата или зажата ли мышка
     if(ContextON == true and not IsContext(e[3],e[4])) then
       draw(e[3],e[4],CurrentColor)
@@ -115,11 +113,11 @@ while true do
     gpu.setBackground(0xFFFFFF)
     term.clear()
     menu()
-  elseif(e[1] == "touch" and e[3] <= 4 and e[4] == 1) then
-    if(ContextON == false) then
-      contextShow()
-    else
+  elseif(e[1] == "touch" and e[3] <= 4 and e[4] == 1 and e[5] == 0) then
+    if ContextON == true then
       contextHide()
+    else
+      contextShow()
     end
   elseif(e[1] == "touch" and e[3] == xSize and e[4] == 1) then --если была нажата кнопка "X"
     break
@@ -128,6 +126,6 @@ end
 gpu.setBackground(0x000000)
 gpu.setForeground(0xFFFFFF)
 term.clear()
-print("Спасибо за использование программы CBEdit v1.6 by SergeyZet1!")
+print("Спасибо за использование программы CBEdit v1.7 by SergeyZet1!")
 os.sleep(2)
 term.clear()
