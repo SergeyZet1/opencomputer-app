@@ -14,9 +14,15 @@ local CoordsButton = {
   {20, 6, "Синий цвет"},
   {20, 7, "Чёрный цвет"},
   {20, 8, "Жёлтый цвет"}
-}
-local Buttons_MaxY = CoordsButton[#CoordsButton][2]
---------------------------Функции, связанные с контекстом-------------------------------------------
+} -- координаты кнопок
+local Buffer = {} --буфер (для того, чтобы не исчезало то, что мы нарисовали в левом верхнем углу)
+local Buttons_MaxY = CoordsButton[#CoordsButton][2] --самое последнее значение Y
+--------------------------------------------------------------------------------------------------------
+local function draw(x,y,color)
+  gpu.setBackground(color)
+  gpu.set(x,y," ")
+end
+------------------------------Функции, связанные с контекстом-------------------------------------------
 local function menu()
   gpu.setBackground(0x403e3e) 
   gpu.fill(1,1,xSize,1," ") 
@@ -25,9 +31,16 @@ local function menu()
   gpu.set(xSize, 1, "X")
   gpu.setForeground(0xFFFFFF)
   gpu.set(1, 1, "Меню")
-  gpu.set((xSize/2)-11, 1, "CBEdit v1.7") 
+  gpu.set((xSize/2)-11, 1, "CBEdit v1.8") 
 end
 local function contextShow()
+  for y = 2, Buttons_MaxY+1 do
+  	Buffer[y] = {}
+  	for x = 1, 20 do 		
+  		local _,_,bg = gpu.get(x,y)
+  		Buffer[y][x] = bg
+  	end
+  end
   gpu.setBackground(0xb5acac)      
   gpu.fill(1,2,20,Buttons_MaxY," ")
   gpu.setForeground(0x000000)
@@ -40,8 +53,13 @@ local function contextShow()
   ContextON = true
 end
 local function contextHide()
-  gpu.setBackground(0xFFFFFF)      
-  gpu.fill(1,2,20,Buttons_MaxY," ")
+  for y = 2, Buttons_MaxY+1 do
+  	for x = 1, 20 do
+  		draw(x,y,Buffer[y][x])
+  	end
+  end
+  --gpu.setBackground(0xFFFFFF)      
+  --gpu.fill(1,2,20,Buttons_MaxY," ")
   ContextON = false
 end
 local function contextAct(num)
@@ -74,12 +92,6 @@ local function IsContext(x,y)
   if(x <= 20 and y <= Buttons_MaxY+1 and y ~= 1) then return true 
   else return false end
 end
---------------------------------------------------------------------------------------------------------
-local function draw(x,y,color)
-  gpu.setBackground(color)
-  gpu.set(x,y," ")
-end
---------------------------------------------------------------------------------------------------------
 gpu.setBackground(0xFFFFFF)
 term.clear()
 menu()
@@ -126,6 +138,6 @@ end
 gpu.setBackground(0x000000)
 gpu.setForeground(0xFFFFFF)
 term.clear()
-print("Спасибо за использование программы CBEdit v1.7 by SergeyZet1!")
+print("Спасибо за использование программы CBEdit v1.8 by SergeyZet1!")
 os.sleep(2)
 term.clear()
