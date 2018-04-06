@@ -44,7 +44,6 @@ local function receiveFile(remoteAddress, fileName)
       file:close()
       fs.remove("/SRF_files".. "/" .. string.sub(remoteAddress,0,4) .. "/" .. fileName)
       print("Ошибка передачи файла " .. fileName .. ". Клиент не отвечает (адрес " .. string.sub(remoteAddress,0,4) .. ")")
-	  break
     end
   end
 end
@@ -77,6 +76,83 @@ local function sendFile(remoteAddress, fileName)
 	print("Передача файла " .. fileName .. " клиенту с адресом " .. client .. " успешно завершена.")
 end
 ------------------------------------------------------------------------------------------------------------------------------
+local function receiveFolder(remoteAddress, folderName, path)
+	path = path .. "/" .. folderName
+	fs.makeDirectory(path)
+	modem.send(remoteAddress,port,"query_ok")
+	local file
+	while true do
+		local e = { event.pull(10,"modem_message") }
+		if(e[3] == remoteAddress and e[4] == port and e[6] == "filesendstart" and e[7] == servername) then
+				file = io.open("/" .. path .. "/" .. e[8], "w")
+				print(path .. "/" .. e[8])
+		end
+		if(e[3] == remoteAddress and e[4] == port and e[6] == "filesend" and e[8] == servername) then
+	  	file:write(e[7])
+		end
+		if(e[3] == remoteAddress and e[4] == port and e[6] == "filesendend" and e[7] == servername) then
+			file:close()
+			print("Отправка файла " .. e[8] .. " от клиента " .. string.sub(remoteAddress,0,4) .. " успешно завершена")
+		end
+		if(e[3] == remoteAddress and e[4] == port and e[6] == "folder" and e[7] == servername) then
+			print("Приём подпапки " .. e[8] .. " от клиента " .. string.sub(remoteAddress,0,4) .. "...")
+			receiveFolder(remoteAddress,e[8], path)
+		end
+		if(e[3] == remoteAddress and e[4] == port and e[6] == "foldersendend" and e[7] == servername) then
+			print("Отправка папки " .. folderName .. " от клиента " .. string.sub(remoteAddress,0,4) .. " успешно завершена")
+			break
+		end
+		if(e[3] == remoteAddress and e[4] == port and e[6] == "twofoldersendend" and e[7] == servername) then
+			print("Отправка подпапки " .. folderName .. " от клиента " .. string.sub(remoteAddress,0,4) .. " успешно завершена")
+			break
+		elseif not e[1] then
+			return print("Ошибка приёма папки " .. folderName .. ". Клиент не отвечает (адрес " .. string.sub(remoteAddress,0,4) .. ")")
+		end
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------
+local function sendFolder(remoteAddress, folderName, path, foreach)
+	local fullPath = path .. folderName
+	if not fs.exists(fullPath) then 
+		modem.send(remoteAddress,port,"error_folder_404",servername)
+		return print("Передача папки " .. folderName .. " клиенту с адресом " .. string.sub(remoteAddress,0,4) .. " закончилось с ошибкой. Папка не найдена.") 
+	end
+	if not fs.isDirectory(fullPath) then 
+		modem.send(remoteAddress,port,"error_no_folder",servername)
+		return print("Передача папки" .. folderName .. " клиенту с адресом " .. string.sub(remoteAddress,0,4) .. " закончилось с ошибкой. Это не папка.") 
+	end
+	local maxPacketSize = modem.maxPacketSize() - 64
+	local data
+	while true do
+		for file in fs.list(fullPath) do
+			if(string.find(file,"/")) then
+				modem.broadcast(port,"folderServer",servername,fs.name(file))
+				print("Отправка подпапки" .. file .. " клиенту " .. string.sub(remoteAddress,0,4) .. "...")
+				sendFolder(remoteAddress,file,fullPath .. "/",1)
+			else
+					print(fullPath .. "/" .. file)
+					local filelol = io.open(fullPath .. "/" .. file,"rb")
+					data = filelol:read(maxPacketSize)
+					modem.broadcast(port,"filesendstartServer",servername, file)
+					while data do
+						modem.broadcast(port,"filesendServer", data, servername, file)
+						data = filelol:read(maxPacketSize)
+						os.sleep(0.1)
+					end
+					modem.broadcast(port, "filesendendServer", servername, fs.name(file))
+					filelol:close()
+					print("Отправка файла " .. fs.name(file) .. " клиенту " .. string.sub(remoteAddress,0,4) .. " успешно завершена")
+			end
+		end
+		if(foreach == 0) then
+			modem.broadcast(port, "foldersendendServer", servername, folderName)
+			return print("Отправка папки " .. folderName .. " клиенту " .. string.sub(remoteAddress,0,4) .. " успешно завершена")
+		else
+			modem.broadcast(port, "twofoldersendendServer", servername, folderName)
+			return print("Отправка подпапки " .. folderName .. " от клиента " .. string.sub(remoteAddress,0,4) .. " успешно завершена")
+		end
+	end
+end
 while true do
   local e = { event.pull("modem_message") }
   if(e[4] == port) then
@@ -86,6 +162,12 @@ while true do
 		elseif(e[6] == "SRF_receivefile_query" and e[8] == servername) then
 			print("Запрос на отправку файла " .. e[7] .. " клиенту с адресом " .. string.sub(e[3],0,4))
 			sendFile(e[3],e[7])
+		elseif(e[6] == "SRF_sendfolder_query" and e[8] == servername) then
+			print("Запрос на принятие папки " .. e[7] .. " от клиента с адресом " .. string.sub(e[3],0,4))
+    	receiveFolder(e[3],e[7],"SRF_files/" .. string.sub(e[3],0,4))
+    elseif(e[6] == "SRF_receivefolder_query" and e[8] == servername) then
+    	print("Запрос на отправку папки " .. e[7] .. " клиенту с адресом " .. string.sub(e[3],0,4) .. "/")
+    	sendFolder(e[3],e[7],"/SRF_files/" .. string.sub(e[3],0,4) .. "/",0)
 		elseif(e[6] == "SRF_servername_query" and e[7] == servername) then
 			modem.broadcast(port,"fuckyou")
 		end
