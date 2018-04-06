@@ -43,7 +43,7 @@ local function receiveFile(remoteAddress, fileName)
     elseif not e[1] then
       file:close()
       fs.remove("/SRF_files".. "/" .. string.sub(remoteAddress,0,4) .. "/" .. fileName)
-      print("Ошибка передачи файла " .. fileName .. ". Клиент не отвечает (адрес " .. string.sub(remoteAddress,0,4) .. ")")
+      return print("Ошибка передачи файла " .. fileName .. ". Клиент не отвечает (адрес " .. string.sub(remoteAddress,0,4) .. ")")
     end
   end
 end
