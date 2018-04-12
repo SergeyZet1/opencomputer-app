@@ -127,7 +127,7 @@ local function sendFolder(remoteAddress, folderName, path, foreach)
 		for file in fs.list(fullPath) do
 			if(string.find(file,"/")) then
 				modem.broadcast(port,"folderServer",servername,fs.name(file))
-				print("Отправка подпапки" .. file .. " клиенту " .. string.sub(remoteAddress,0,4) .. "...")
+				print("Отправка подпапки " .. file .. " клиенту " .. string.sub(remoteAddress,0,4) .. "...")
 				sendFolder(remoteAddress,file,fullPath .. "/",1)
 			else
 					print(fullPath .. "/" .. file)
@@ -153,6 +153,38 @@ local function sendFolder(remoteAddress, folderName, path, foreach)
 		end
 	end
 end
+---------------------------------------------------------------------------------------------------------------------------------------
+local function SendFileList(address,Path,foreach)
+	local fullPath
+	if foreach == 0 then
+ 		fullPath = "/SRF_files/" .. string.sub(address,0,4) .. "/" .. Path .. "/"
+ 	else
+ 		fullPath = Path
+ 	end
+	if not fs.exists(fullPath) then
+		modem.broadcast(port,"query_FL_error",servername)
+		return print("Клиент " .. string.sub(address,0,4) .. " не смог получить список файлов. Папки/файла не существует.")
+	end
+	while true do
+		if(foreach == 0) then
+			modem.broadcast(port,"query_FL_start",servername)
+			print("Клиент " .. string.sub(address,0,4) .. " запросил список файлов по пути " .. fullPath)
+		end
+		for file in fs.list(fullPath) do
+			if(fs.isDirectory(fullPath .. file)) then
+				SendFileList(address,fullPath .. fs.name(file) .. "/",1)
+			end
+			modem.broadcast(port,"query_FL",servername,fullPath .. file)
+		end
+		if(foreach == 0) then
+			modem.broadcast(port,"query_FL_end",servername)
+			print("Передача списка файла клиенту " .. string.sub(address,0,4) .. " успешно!")
+			break
+		end
+		break
+	end	
+end
+---------------------------------------------------------------------------------------------------------------------------------------
 while true do
   local e = { event.pull("modem_message") }
   if(e[4] == port) then
@@ -170,6 +202,8 @@ while true do
     	sendFolder(e[3],e[7],"/SRF_files/" .. string.sub(e[3],0,4) .. "/",0)
 		elseif(e[6] == "SRF_servername_query" and e[7] == servername) then
 			modem.broadcast(port,"fuckyou")
+		elseif(e[6] == "SRF_sendFL_query" and e[7] == servername) then
+			SendFileList(e[3],e[8],0)
 		end
   end
 end

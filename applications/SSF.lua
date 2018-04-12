@@ -14,6 +14,7 @@ modem.setStrength(3000)
 modem.open(port)
 --------------------------------------------------------------------------------------
 local function sendFile(name,filePath)
+	if(fs.isDirectory(filePath)) then return print("Нельзя вводить катологи!") end
 	if not fs.exists(filePath) then return print("Файл не найден!") end
 	modem.broadcast(port,"SRF_sendfile_query",fs.name(filePath), name)
 	print("Отправляю запрос на сервер " .. name)
@@ -115,6 +116,7 @@ local function sendFolder(name,path,foreach)
 		end
 	end
 end
+-----------------------------------------------------------------------------------------------------------------------------------------------
 local function receiveFolder(name,path,foreach)
 	local fullPath = "/SSF_files/" .. name .. "/" .. path
 	fs.makeDirectory("/SSF_files/" .. name .. "/" .. path)
@@ -156,12 +158,49 @@ local function receiveFolder(name,path,foreach)
 		end
 	end 
 end
+-----------------------------------------------------------------------------------------------------------------------------------------------
+local function SendQueryFileList(servername,path)
+	if(not fs.isDirectory(path)) then return print("Нельзя вводить имена файлов!") end
+	modem.broadcast(port,"SRF_sendFL_query",servername,path)
+	fs.makeDirectory("/SSF_logs/" .. servername)
+	local pathtolog = "/SSF_logs/" .. servername .. "/log_" .. string.gsub(os.date(),"[:/ ]","_")
+	local file = io.open(pathtolog, "w")
+	while true do
+		local e = { event.pull(10,"modem_message") }
+		if(e[6] == "query_FL_start" and e[7] == servername) then
+			file:write("Начало списка файлов...\n")
+			file:write("-------------------------------------------------------------------\n")
+		end
+		if(e[6] == "query_FL" and e[7] == servername) then
+			file:write(e[8] .. "\n")
+		end
+		if(e[6] == "query_FL_end" and e[7] == servername) then
+			file:write("Конец списка файлов...\n")
+			file:write("-------------------------------------------------------------------\n")
+			file:close()
+			print("Список файлов сервера " .. servername .. " скачан. Список находится по пути " .. pathtolog)
+			break
+		end
+		if(e[6] == "query_FL_error" and e[7] == servername) then
+			file:write("Не удалось получить список файлов сервера " .. servername .. ". Папки не существует.\n")
+			file:close()
+			print("Не удалось получить список файлов сервера " .. servername .. ". Папки не существует.")
+			break
+		end
+		if not e[1] then
+			file:write("Не удалось получить список файлов сервера " .. servername .. ". Сервер не отвечает.\n")
+			file:close()
+			print("Не удалось получить список файлов сервера " .. servername .. ". Сервер не отвечает.")
+			break
+		end
+	end
+end
 local args, options = shell.parse(...)
 if(args[1] == nil or args[2] == nil) then return print("Введите адрес и путь к файлу (SSF [имя сервера] [файл/путь к нему] [куда? (при флаге -r)] [-r - получает файл от сервера, -f - отправить/получить папку])") end
 for x, i in pairs(options) do
-	if x ~= "r" and x ~= "f" then return print("Неверный аргумент!") end
+	if x ~= "r" and x ~= "f" and x ~= "l" then return print("Неверный аргумент!") end
 end
-if not options["r"] and not options["f"]  then
+if not options["r"] and not options["f"] and not options["l"]  then
 	sendFile(args[1],args[2])
 elseif options["r"] and not options["f"] then
 	receiveFile(args[1],args[2])
@@ -169,4 +208,6 @@ elseif not options["r"] and options["f"] then
 	sendFolder(args[1],args[2],0)
 elseif options["r"] and options["f"] then
 	receiveFolder(args[1],args[2],0)
+elseif not options["r"] and not options["f"] and options["l"] then
+	SendQueryFileList(args[1],args[2])
 else return print("Неверный аргумент!") end
